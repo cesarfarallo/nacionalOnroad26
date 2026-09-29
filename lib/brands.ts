@@ -10,9 +10,9 @@ export const BRANDS: Record<BrandKind, Brand[]> = {
     { name: "Serpent", image: "/brands/chassis/serpent.png" },
     { name: "Shepherd", image: "/brands/chassis/shepherd.png" },
     { name: "Team Associated", image: "/brands/chassis/team-associated.png" },
-    { name: "Losi" },
-    { name: "3Racing" },
-    { name: "Awesomatix" },
+    { name: "Losi", image: "/brands/chassis/losi.png" },
+    { name: "3Racing", image: "/brands/chassis/3racing.png" },
+    { name: "Awesomatix", image: "/brands/chassis/awesomatix.png" },
   ],
   engine: [
     { name: "Novarossi" }, { name: "Picco" }, { name: "Sirio" }, { name: "Hobbywing" },
