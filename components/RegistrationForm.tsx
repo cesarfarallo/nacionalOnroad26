@@ -13,6 +13,7 @@ export default function RegistrationForm() {
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState("");
   const [open, setOpen] = useState<Category | null>(null);
+  const [optin, setOptin] = useState(false);
 
   const missing = (c: Category, e: Entry) =>
     !e.chassis_brand.trim() || !e.engine_brand.trim() || !e.tire_brand.trim() || (!isNitro(c) && !e.esc_brand.trim());
@@ -41,7 +42,7 @@ export default function RegistrationForm() {
     setState("sending");
     const r = await fetch("/api/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...p, entries }),
+      body: JSON.stringify({ ...p, email_optin: optin, entries }),
     }).catch(() => null);
     if (r?.ok) return setState("done");
     setState("idle");
@@ -113,6 +114,11 @@ export default function RegistrationForm() {
           </section>
         );
       })}
+
+      <label className="flex cursor-pointer items-start gap-3 text-sm">
+        <input type="checkbox" checked={optin} onChange={(e) => setOptin(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" />
+        <span>Acepto recibir avisos por mail sobre mi inscripción y el evento.</span>
+      </label>
 
       {error && <p role="alert" className="rounded-lg bg-red-500/20 p-3 text-red-200">{error}</p>}
       <button

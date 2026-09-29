@@ -4,6 +4,7 @@ export const CSV_HEADER =
 export type Row = {
   first_name: string; last_name: string; nickname: string | null; email: string;
   phone: string | null; club: string | null; created_at: string;
+  registration_id: string; email_optin: boolean; paid: boolean;
   category: string; transponder: string | null;
   chassis_brand: string | null; engine_brand: string | null; esc_brand: string | null; tire_brand: string | null;
 };
@@ -18,7 +19,7 @@ export function buildCsv(rows: Row[]) {
   const lines = rows.map((r) => {
     const m: Record<string, string> = {
       FirstName: r.first_name, LastName: r.last_name, NickName: r.nickname ?? "",
-      ClassName: r.category, IsPaid: "false", LocalRegisteredDateTime: r.created_at,
+      ClassName: r.category, IsPaid: r.paid ? "true" : "false", LocalRegisteredDateTime: r.created_at,
       TireNumber: r.tire_brand ?? "", Manufacturer: r.engine_brand ?? "",
       ChassisManufacturer: r.chassis_brand ?? "", ModelName: r.esc_brand ? `ESC: ${r.esc_brand}` : "", TransponderNumber: r.transponder ?? "",
       Email: r.email, PhoneNumber: r.phone ?? "", ClubName: r.club ?? "",

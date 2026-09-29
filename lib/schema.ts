@@ -22,6 +22,7 @@ export const registerSchema = z.object({
   email: z.string().trim().email("Email inválido").max(120),
   phone: z.string().trim().max(30).optional().default(""),
   club: z.string().trim().max(80).optional().default(""),
+  email_optin: z.boolean().optional().default(false),
   website: z.string().max(0).optional(), // honeypot
   entries: z
     .array(entrySchema)
