@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
 import type { Row } from "@/lib/csv";
 import { drawPoster } from "@/lib/poster";
@@ -18,6 +18,49 @@ export default function Admin() {
     else if (r.status !== 401) setMsg((await r.json().catch(() => null))?.error ?? "Error al cargar");
   }
   useEffect(() => { load(); }, []);
+
+  // Un piloto por inscripción (el pago es por piloto, no por categoría)
+  const pilots = useMemo(() => {
+    const m = new Map<string, { id: string; name: string; email: string; optin: boolean; paid: boolean; cats: string[] }>();
+    for (const r of rows ?? []) {
+      const p = m.get(r.registration_id) ?? {
+        id: r.registration_id, name: `${r.first_name} ${r.last_name}`.trim(), email: r.email,
+        optin: r.email_optin, paid: r.paid, cats: [],
+      };
+      p.cats.push(r.category);
+      m.set(r.registration_id, p);
+    }
+    return [...m.values()];
+  }, [rows]);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [payMsg, setPayMsg] = useState("");
+
+  async function togglePaid(p: { id: string; name: string; email: string; optin: boolean; paid: boolean }) {
+    const paid = !p.paid;
+    const ask = !paid
+      ? `¿Marcar como NO pagado a ${p.name}? No se enviará ningún mail.`
+      : p.optin
+        ? `¿Confirmás el pago de ${p.name}?\n\nSe enviará un mail de confirmación a ${p.email}.`
+        : `¿Confirmás el pago de ${p.name}?\n\nNo aceptó recibir mails: se marcará como pagado sin enviar mail.`;
+    if (!window.confirm(ask)) return;
+    setBusy(p.id); setPayMsg("");
+    try {
+      const r = await fetch("/api/admin/payment", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registrationId: p.id, paid, sendEmail: true }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) setPayMsg(j.error ?? "No se pudo guardar el pago");
+      else setPayMsg(
+        j.email === "sent" ? `Pago de ${p.name} confirmado y mail enviado a ${p.email}.`
+        : j.email === "failed" ? `Pago de ${p.name} guardado, pero NO se pudo enviar el mail (${j.emailError ?? "error"}). Destildá y volvé a tildar para reintentar.`
+        : j.email === "already_sent" ? `Pago de ${p.name} guardado. El mail ya se había enviado antes.`
+        : j.email === "no_optin" ? `Pago de ${p.name} guardado (no aceptó recibir mails).`
+        : paid ? `Pago de ${p.name} guardado.` : `${p.name} marcado como no pagado.`,
+      );
+      await load();
+    } finally { setBusy(null); }
+  }
   useEffect(() => { if (rows && canvas.current) drawPoster(canvas.current, cats, rows, date); }, [rows, cats, date]);
 
   async function login(e: React.FormEvent) {
@@ -51,6 +94,29 @@ export default function Admin() {
         <a href="/api/admin/export" className="rounded-lg bg-emerald-500 px-4 py-2 font-bold">Descargar CSV (GenericImport)</a>
         <button onClick={load} className="rounded-lg bg-white/10 px-4 py-2">Actualizar</button>
       </div>
+      <section className="space-y-2">
+        <h2 className="text-xl font-black">Pagos ({pilots.filter((p) => p.paid).length}/{pilots.length} pagaron)</h2>
+        {payMsg && <p role="status" className="rounded-lg bg-white/10 p-2 text-sm">{payMsg}</p>}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead><tr className="text-sky-300">{["Pagó", "Piloto", "Email", "Categorías", "Acepta mails"].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead>
+            <tbody>
+              {pilots.map((p) => (
+                <tr key={p.id} className="border-t border-white/10">
+                  <td className="p-2">
+                    <input type="checkbox" className="h-5 w-5" checked={p.paid} disabled={busy === p.id}
+                      onChange={() => togglePaid(p)} aria-label={`Pagó ${p.name}`} />
+                  </td>
+                  <td className="p-2">{p.name}</td><td className="p-2">{p.email}</td>
+                  <td className="p-2">{p.cats.join(", ")}</td>
+                  <td className="p-2">{p.optin ? "Sí" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <h2 className="text-xl font-black">Detalle por categoría</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead><tr className="text-sky-300">{["Categoría", "Piloto", "Email", "Transp.", "Chasis", "Motor", "Variador", "Gomas"].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead>

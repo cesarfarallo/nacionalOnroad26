@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { CATEGORIES, isGT, isNitro, type Category } from "@/lib/categories";
+import { CATEGORIES, exclusiveWith, isGT, isNitro, type Category } from "@/lib/categories";
 import BrandPicker from "./BrandPicker";
 
 type Entry = { transponder: string; chassis_brand: string; engine_brand: string; esc_brand: string; tire_brand: string };
@@ -13,6 +13,8 @@ export default function RegistrationForm() {
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState("");
   const [open, setOpen] = useState<Category | null>(null);
+  const [optin, setOptin] = useState(false);
+  const [notice, setNotice] = useState("");
 
   const missing = (c: Category, e: Entry) =>
     !e.chassis_brand.trim() || !e.engine_brand.trim() || !e.tire_brand.trim() || (!isNitro(c) && !e.esc_brand.trim());
@@ -21,8 +23,15 @@ export default function RegistrationForm() {
     if (sel[c]) {
       setSel((s) => { const n = { ...s }; delete n[c]; return n; });
       setOpen((o) => (o === c ? null : o));
+      setNotice("");
     } else {
-      setSel((s) => ({ ...s, [c]: { ...empty } }));
+      const others = exclusiveWith(c).filter((x) => sel[x]);
+      setSel((s) => {
+        const n = { ...s, [c]: { ...empty } };
+        for (const x of others) delete n[x]; // categorías excluyentes: queda solo la elegida
+        return n;
+      });
+      setNotice(others.length ? `${c} y ${others.join(", ")} son excluyentes: se quitó ${others.join(", ")}.` : "");
       setOpen(c); // se abre la que se está completando y se pliegan las demás
     }
   };
@@ -41,7 +50,7 @@ export default function RegistrationForm() {
     setState("sending");
     const r = await fetch("/api/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...p, entries }),
+      body: JSON.stringify({ ...p, email_optin: optin, entries }),
     }).catch(() => null);
     if (r?.ok) return setState("done");
     setState("idle");
@@ -74,6 +83,7 @@ export default function RegistrationForm() {
 
       <section>
         <h2 className="text-lg font-black uppercase">Categorías</h2>
+        <p className="text-xs text-white/70">Touring Eco Modified y Touring Eco Stock son excluyentes: elegí solo una.</p>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {CATEGORIES.map((c) => (
             <label key={c} className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 font-bold ${sel[c] ? "border-sky-400 bg-sky-500/20" : "border-white/10"}`}>
@@ -82,6 +92,7 @@ export default function RegistrationForm() {
             </label>
           ))}
         </div>
+        {notice && <p role="status" className="mt-2 rounded-lg bg-amber-500/20 p-2 text-sm text-amber-100">{notice}</p>}
       </section>
 
       {CATEGORIES.filter((c) => sel[c]).map((c) => {
@@ -113,6 +124,11 @@ export default function RegistrationForm() {
           </section>
         );
       })}
+
+      <label className="flex cursor-pointer items-start gap-3 text-sm">
+        <input type="checkbox" checked={optin} onChange={(e) => setOptin(e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0" />
+        <span>Acepto recibir avisos por mail sobre mi inscripción y el evento.</span>
+      </label>
 
       {error && <p role="alert" className="rounded-lg bg-red-500/20 p-3 text-red-200">{error}</p>}
       <button

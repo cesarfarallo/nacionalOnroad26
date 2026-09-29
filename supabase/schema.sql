@@ -1,4 +1,4 @@
--- Esquema completo (001 + 002). Idempotente: se puede correr más de una vez.
+-- Esquema completo (001 + 002 + 003). Idempotente: se puede correr más de una vez.
 -- Pegar en Supabase → SQL Editor, en el proyecto dev y en el prod.
 create extension if not exists pgcrypto;
 
@@ -24,6 +24,12 @@ create table if not exists entries (
   unique (registration_id, category)
 );
 alter table entries add column if not exists esc_brand text;
+
+-- Pagos y opt-in de mail (por piloto)
+alter table registrations add column if not exists email_optin boolean not null default false;
+alter table registrations add column if not exists paid boolean not null default false;
+alter table registrations add column if not exists paid_at timestamptz;
+alter table registrations add column if not exists payment_email_sent_at timestamptz;
 
 -- RLS activo sin policies: solo accede el service role desde las rutas API.
 alter table registrations enable row level security;
