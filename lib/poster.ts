@@ -195,5 +195,5 @@ export async function drawPoster(
 
   // Pie
   g.fillStyle = "rgba(255,255,255,0.7)";
-  fitText(g, "CIRCUITO HERNÁN MATICOLI · 20, 21 Y 22 DE NOVIEMBRE", W / 2, H - FOOTER_H / 2, W - 2 * M, 26, "500", family, "center");
+  fitText(g, "CIRCUITO HERNÁN MATTICOLI · 20, 21 Y 22 DE NOVIEMBRE", W / 2, H - FOOTER_H / 2, W - 2 * M, 26, "500", family, "center");
 }
