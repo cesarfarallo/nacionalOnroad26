@@ -13,7 +13,7 @@ export default function RegistrationForm() {
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const [error, setError] = useState("");
   const [open, setOpen] = useState<Category | null>(null);
-  const [optin, setOptin] = useState(false);
+  const [optin, setOptin] = useState(true);
   const [notice, setNotice] = useState("");
 
   const missing = (c: Category, e: Entry) =>
