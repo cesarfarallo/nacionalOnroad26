@@ -20,7 +20,7 @@ export const BRANDS: Record<BrandKind, Brand[]> = {
   ],
   engine_nitro: [
     { name: "Novarossi", image: "/brands/engine/novarossi.png" }, { name: "Picco", image: "/brands/engine/picco.png" }, { name: "Sirio", image: "/brands/engine/sirio.png" }, { name: "O.S. Speed", image: "/brands/engine/os-speed.png" },
-    { name: "REDS" }, { name: "Team Orion" }, { name: "Nova Engines" }, { name: "Rapide" },
+    { name: "REDS", image: "/brands/engine/reds.png" }, { name: "Team Orion", image: "/brands/engine/team-orion.png" }, { name: "Nova Engines", image: "/brands/engine/nova-engines.png" }, { name: "Rapide" },
     { name: "Syncro" }, { name: "Gi-Mar", image: "/brands/engine/gimar.png" },
   ],
   // Eco: motor + variador van en combo, se elige la marca del combo.
