@@ -2,7 +2,7 @@
 // Las listas de abajo solo dicen qué marcas aparecen en cada selector.
 // Sin `image` se muestra un mosaico de texto.
 export type Brand = { name: string; image?: string };
-export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires";
+export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt";
 
 const b = (name: string, file?: string, ext = "png"): Brand => ({ name, image: file ? `/brands/${file}.${ext}` : undefined });
 
@@ -18,7 +18,7 @@ const CATALOG = {
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
   trinity: b("Trinity", "trinity"),
   tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
-  sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"),
+  sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"), pmt: b("PMT", "pmt"),
 };
 type Id = keyof typeof CATALOG;
 
@@ -37,6 +37,8 @@ const LISTS: Record<BrandKind, Id[]> = {
   engine_eco: ecoBrands,
   esc: ecoBrands,
   tires: ["sweep", "matrix"],
+  // PMT solo para GT Nitro y GT Eco
+  tires_gt: ["sweep", "matrix", "pmt"],
 };
 
 export const BRANDS = Object.fromEntries(
@@ -49,4 +51,5 @@ export const KIND_LABEL: Record<BrandKind, string> = {
   engine_eco: "Marca de motor",
   esc: "Marca de variador (controladora)",
   tires: "Marca de gomas",
+  tires_gt: "Marca de gomas",
 };

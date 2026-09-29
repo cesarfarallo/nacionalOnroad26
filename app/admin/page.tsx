@@ -15,7 +15,7 @@ export default function Admin() {
   async function load() {
     const r = await fetch("/api/admin/registrations");
     if (r.ok) setRows((await r.json()).rows);
-    else if (r.status !== 401) setMsg("Error al cargar");
+    else if (r.status !== 401) setMsg((await r.json().catch(() => null))?.error ?? "Error al cargar");
   }
   useEffect(() => { load(); }, []);
   useEffect(() => { if (rows && canvas.current) drawPoster(canvas.current, cats, rows, date); }, [rows, cats, date]);
