@@ -1,61 +1,199 @@
 import type { Row } from "./csv";
+import { brandImageByName } from "./brands";
+import { isNitro, type Category } from "./categories";
 
-const W = 1024, H = 1536;
-const ACCENT: Record<string, [string, string]> = {
-  "GT Eco": ["#ff8a00", "#c25a00"],
-  "GT Nitro": ["#ff2a2a", "#a00000"],
-  "1/8 SP": ["#ff2a2a", "#a00000"],
-  "Touring Eco Modified": ["#1e90ff", "#0a4a99"],
-  "Touring Eco Stock": ["#22c55e", "#0f7a37"],
+const W = 1080;
+const M = 40; // margen lateral
+const BANNER_H = 470;
+const TITLE_H = 130;
+const CAT_H = 66;
+const HEAD_H = 46;
+const ROW_H = 58;
+const ROW_GAP = 6;
+const BLOCK_GAP = 34;
+const FOOTER_H = 80;
+
+const ACCENT: Record<string, string> = {
+  "GT Eco": "#ff8a00",
+  "GT Nitro": "#ff2a2a",
+  "1/8 SP": "#e01414",
+  "Touring Eco Modified": "#1e90ff",
+  "Touring Eco Stock": "#22c55e",
 };
 
-export const displayName = (r: Row) =>
-  `${r.first_name} ${r.last_name}`.trim().toUpperCase();
+export const displayName = (r: Row) => `${r.first_name} ${r.last_name}`.trim().toUpperCase();
 
-/** Dibuja una imagen tipo "PRE-INSCRIPCIÓN" con hasta 2 categorías por imagen. */
-export function drawPoster(canvas: HTMLCanvasElement, cats: string[], rows: Row[], dateText: string) {
+type ColKey = "chassis_brand" | "engine_brand" | "esc_brand" | "tire_brand";
+type Col = { key: ColKey; label: string };
+const columnsFor = (cat: string): Col[] =>
+  isNitro(cat as Category)
+    ? [{ key: "chassis_brand", label: "CHASIS" }, { key: "engine_brand", label: "MOTOR" }, { key: "tire_brand", label: "GOMAS" }]
+    : [
+        { key: "chassis_brand", label: "CHASIS" }, { key: "engine_brand", label: "MOTOR" },
+        { key: "esc_brand", label: "VARIADOR" }, { key: "tire_brand", label: "GOMAS" },
+      ];
+
+const cache = new Map<string, Promise<HTMLImageElement | null>>();
+function loadImage(src: string) {
+  let p = cache.get(src);
+  if (!p) {
+    p = new Promise<HTMLImageElement | null>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+    cache.set(src, p);
+  }
+  return p;
+}
+
+export type PosterOptions = {
+  /** Familia tipográfica (CSS font-family) ya cargada, p. ej. la de next/font. */
+  fontFamily?: string;
+  /** Devuelve true si el dibujo quedó obsoleto (cambió la selección): no se pinta. */
+  isCancelled?: () => boolean;
+};
+
+const rrect = (g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) => {
+  g.beginPath();
+  g.roundRect(x, y, w, h, r);
+};
+
+/** Escribe texto ajustando el tamaño de fuente para que entre en `maxW`. */
+function fitText(
+  g: CanvasRenderingContext2D, text: string, x: number, y: number, maxW: number,
+  size: number, weight: string, family: string, align: CanvasTextAlign = "left",
+) {
+  let s = size;
+  g.font = `${weight} ${s}px ${family}`;
+  while (s > 10 && g.measureText(text).width > maxW) { s -= 1; g.font = `${weight} ${s}px ${family}`; }
+  g.textAlign = align; g.textBaseline = "middle";
+  g.fillText(text, x, y);
+}
+
+/**
+ * Dibuja la imagen de pre-inscriptos (estilo tabla de resultados) con hasta 2 categorías.
+ * El alto del canvas depende de la cantidad de pilotos, así no se corta ninguno.
+ */
+export async function drawPoster(
+  canvas: HTMLCanvasElement, cats: string[], rows: Row[], updateLine: string, opts: PosterOptions = {},
+) {
+  const family = opts.fontFamily ?? "Impact, 'Arial Black', sans-serif";
+  const blocks = cats.map((c) => ({
+    cat: c,
+    cols: columnsFor(c),
+    rows: rows.filter((r) => r.category === c).sort((a, b) => a.created_at.localeCompare(b.created_at)),
+  }));
+
+  // Precarga: banner y todos los logos usados (el canvas se pinta recién cuando todo está listo)
+  const urls = new Set<string>(["/banner.webp"]);
+  for (const b of blocks) for (const r of b.rows) for (const col of b.cols) {
+    const u = brandImageByName(r[col.key]);
+    if (u) urls.add(u);
+  }
+  const imgs = new Map<string, HTMLImageElement | null>();
+  await Promise.all([...urls].map(async (u) => imgs.set(u, await loadImage(u))));
+  if (opts.isCancelled?.()) return;
+
+  const bodyH = blocks.reduce((h, b) => h + CAT_H + HEAD_H + Math.max(b.rows.length, 1) * (ROW_H + ROW_GAP) + BLOCK_GAP, 0);
+  const H = BANNER_H + TITLE_H + bodyH + FOOTER_H;
   canvas.width = W; canvas.height = H;
   const g = canvas.getContext("2d")!;
+
+  // Fondo
   const bg = g.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, "#1a0a0a"); bg.addColorStop(1, "#050506");
+  bg.addColorStop(0, "#0b1220"); bg.addColorStop(1, "#05070c");
   g.fillStyle = bg; g.fillRect(0, 0, W, H);
-  g.fillStyle = "#e01414"; g.fillRect(0, 0, W, 10);
 
-  g.textAlign = "center"; g.fillStyle = "#fff";
-  g.font = "italic 900 96px Impact, 'Arial Black', sans-serif";
-  g.shadowColor = "#e01414"; g.shadowBlur = 20;
-  g.fillText("PRE-INSCRIPCIÓN", W / 2, 130); g.shadowBlur = 0;
-  g.font = "italic 900 40px Impact, 'Arial Black', sans-serif";
-  g.fillStyle = "#ff3030"; g.fillText("AAPARTT NACIONAL ONROAD", W / 2, 190);
-  g.fillStyle = "#fff"; g.font = "italic 900 84px Impact, 'Arial Black', sans-serif";
-  g.fillText(dateText.toUpperCase(), W / 2, 300);
+  // Banner (recorte superior: título y fechas) con fundido hacia el fondo
+  const banner = imgs.get("/banner.webp");
+  if (banner) {
+    const srcH = (BANNER_H * banner.width) / W;
+    g.drawImage(banner, 0, 0, banner.width, srcH, 0, 0, W, BANNER_H);
+    const fade = g.createLinearGradient(0, BANNER_H - 90, 0, BANNER_H);
+    fade.addColorStop(0, "rgba(11,18,32,0)"); fade.addColorStop(1, "#0b1220");
+    g.fillStyle = fade; g.fillRect(0, BANNER_H - 90, W, 90);
+  }
 
-  g.fillStyle = "#111"; g.strokeStyle = "#e01414"; g.lineWidth = 3;
-  g.fillRect(50, 350, W - 100, 80); g.strokeRect(50, 350, W - 100, 80);
-  g.fillStyle = "#fff"; g.font = "italic 900 52px Impact, 'Arial Black', sans-serif";
-  g.fillText("PILOTOS PRE-INSCRIPTOS", W / 2, 408);
+  // Título
+  let y = BANNER_H;
+  g.save();
+  const ty = y + 36, skew = 0.18;
+  g.transform(1, 0, -skew, 1, skew * ty, 0); // cursiva, compensando el corrimiento para que quede centrado
+  g.fillStyle = "#ffffff"; g.shadowColor = "#1e90ff"; g.shadowBlur = 24;
+  fitText(g, "PRE-INSCRIPTOS", W / 2, ty, W - 2 * M, 84, "700", family, "center");
+  g.restore();
+  g.fillStyle = "rgba(255,255,255,0.75)";
+  fitText(g, updateLine, W / 2, y + 100, W - 2 * M, 28, "500", family, "center");
+  y += TITLE_H;
 
-  const colW = (W - 120) / Math.max(cats.length, 1);
-  const rowH = 52;
-  const maxRows = Math.floor((H - 560) / rowH);
-  cats.forEach((cat, i) => {
-    const x = 50 + i * (colW + 20) - (cats.length === 1 ? -(W - 100 - colW) / 2 + 0 : 0);
-    const [c1, c2] = ACCENT[cat] ?? ["#ff2a2a", "#a00000"];
-    g.fillStyle = "#0b0b0b"; g.strokeStyle = c1; g.lineWidth = 3;
-    g.fillRect(x, 460, colW, 70); g.strokeRect(x, 460, colW, 70);
-    g.fillStyle = c1; g.font = "italic 900 44px Impact, 'Arial Black', sans-serif";
-    g.textAlign = "center"; g.fillText(cat.toUpperCase(), x + colW / 2, 512, colW - 20);
-    rows.filter((r) => r.category === cat).slice(0, maxRows).forEach((r, j) => {
-      const y = 550 + j * rowH;
-      g.fillStyle = c1; g.fillRect(x, y, 56, rowH - 6);
-      g.fillStyle = c2; g.fillRect(x + 40, y, 16, rowH - 6);
-      g.fillStyle = "#fff"; g.font = "900 34px Impact, 'Arial Black', sans-serif";
-      g.textAlign = "center"; g.fillText(String(j + 1), x + 26, y + 38);
-      const lg = g.createLinearGradient(0, y, 0, y + rowH);
-      lg.addColorStop(0, "#f5f5f5"); lg.addColorStop(1, "#9a9a9a");
-      g.fillStyle = lg; g.fillRect(x + 60, y, colW - 60, rowH - 6);
-      g.fillStyle = "#111"; g.textAlign = "left"; g.font = "900 32px Impact, 'Arial Black', sans-serif";
-      g.fillText(displayName(r), x + 76, y + 38, colW - 96);
+  const tableW = W - 2 * M;
+  const numW = 70;
+
+  for (const b of blocks) {
+    const accent = ACCENT[b.cat] ?? "#e01414";
+    const nameW = b.cols.length === 3 ? 330 : 290;
+    const brandW = (tableW - numW - nameW - (b.cols.length + 1) * 6) / b.cols.length;
+    const xNum = M, xName = xNum + numW + 6;
+    const xCol = (i: number) => xName + nameW + 6 + i * (brandW + 6);
+
+    // Barra de categoría
+    g.fillStyle = "#0c0c0f"; rrect(g, M, y, tableW, CAT_H - 6, 6); g.fill();
+    g.fillStyle = accent; g.fillRect(M, y, 14, CAT_H - 6);
+    g.fillStyle = "#ffffff";
+    fitText(g, b.cat.toUpperCase(), M + 34, y + (CAT_H - 6) / 2, tableW - 260, 44, "700", family);
+    g.fillStyle = accent;
+    fitText(g, `${b.rows.length} ${b.rows.length === 1 ? "PILOTO" : "PILOTOS"}`, M + tableW - 24, y + (CAT_H - 6) / 2, 220, 28, "500", family, "right");
+    y += CAT_H;
+
+    // Encabezado de columnas
+    g.fillStyle = "#1b2233"; g.fillRect(M, y, tableW, HEAD_H - 6);
+    g.fillStyle = "#ffffff";
+    fitText(g, "#", xNum + numW / 2, y + (HEAD_H - 6) / 2, numW, 24, "700", family, "center");
+    fitText(g, "PILOTO", xName + 18, y + (HEAD_H - 6) / 2, nameW, 24, "700", family);
+    b.cols.forEach((c, i) => fitText(g, c.label, xCol(i) + brandW / 2, y + (HEAD_H - 6) / 2, brandW, 24, "700", family, "center"));
+    y += HEAD_H;
+
+    if (!b.rows.length) {
+      g.fillStyle = "rgba(255,255,255,0.6)";
+      fitText(g, "Todavía no hay pilotos inscriptos", W / 2, y + ROW_H / 2, tableW, 26, "500", family, "center");
+      y += ROW_H + ROW_GAP;
+    }
+
+    b.rows.forEach((r, i) => {
+      // número
+      g.fillStyle = "#0c0c0f"; g.fillRect(xNum, y, numW, ROW_H);
+      g.fillStyle = accent; g.fillRect(xNum, y, 6, ROW_H);
+      g.fillStyle = "#ffffff";
+      fitText(g, String(i + 1), xNum + numW / 2 + 3, y + ROW_H / 2, numW - 16, 34, "700", family, "center");
+      // nombre
+      g.fillStyle = "#ffffff"; g.fillRect(xName, y, nameW, ROW_H);
+      g.fillStyle = "#0b0f1a";
+      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28, 30, "700", family);
+      // marcas
+      b.cols.forEach((c, k) => {
+        const x = xCol(k);
+        g.fillStyle = "#ffffff"; g.fillRect(x, y, brandW, ROW_H);
+        const value = r[c.key];
+        const url = brandImageByName(value);
+        const img = url ? imgs.get(url) : null;
+        if (img) {
+          const pad = 6, bw = brandW - pad * 2, bh = ROW_H - pad * 2;
+          const k2 = Math.min(bw / img.width, bh / img.height);
+          const dw = img.width * k2, dh = img.height * k2;
+          g.drawImage(img, x + (brandW - dw) / 2, y + (ROW_H - dh) / 2, dw, dh);
+        } else {
+          g.fillStyle = "#0b0f1a";
+          fitText(g, (value ?? "—").toUpperCase(), x + brandW / 2, y + ROW_H / 2, brandW - 16, 24, "700", family, "center");
+        }
+      });
+      y += ROW_H + ROW_GAP;
     });
-  });
+    y += BLOCK_GAP;
+  }
+
+  // Pie
+  g.fillStyle = "rgba(255,255,255,0.7)";
+  fitText(g, "CIRCUITO HERNÁN MATICOLI · 20, 21 Y 22 DE NOVIEMBRE", W / 2, H - FOOTER_H / 2, W - 2 * M, 26, "500", family, "center");
 }

@@ -2,13 +2,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
 import type { Row } from "@/lib/csv";
+import { Oswald } from "next/font/google";
 import { drawPoster } from "@/lib/poster";
+
+const oswald = Oswald({ subsets: ["latin"], weight: ["500", "700"] });
 
 export default function Admin() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [pw, setPw] = useState("");
   const [msg, setMsg] = useState("");
-  const [date, setDate] = useState("Sábado 3 de octubre");
+  const [date, setDate] = useState(() => `Actualizado al ${new Date().toLocaleDateString("es-AR")}`);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [cats, setCats] = useState<string[]>(["GT Eco", "1/8 SP"]);
 
@@ -61,7 +64,16 @@ export default function Admin() {
       await load();
     } finally { setBusy(null); }
   }
-  useEffect(() => { if (rows && canvas.current) drawPoster(canvas.current, cats, rows, date); }, [rows, cats, date]);
+  useEffect(() => {
+    if (!rows || !canvas.current) return;
+    let cancelled = false;
+    const family = oswald.style.fontFamily;
+    (async () => {
+      try { await Promise.all([document.fonts.load(`700 30px ${family}`), document.fonts.load(`500 30px ${family}`)]); } catch { /* usa la fuente de respaldo */ }
+      if (!cancelled) await drawPoster(canvas.current!, cats, rows, date, { fontFamily: family, isCancelled: () => cancelled });
+    })();
+    return () => { cancelled = true; };
+  }, [rows, cats, date]);
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
@@ -140,7 +152,7 @@ export default function Admin() {
             </label>
           ))}
         </div>
-        <input value={date} onChange={(e) => setDate(e.target.value)} className="w-full max-w-sm rounded-lg border border-white/20 bg-black/40 px-3 py-2" aria-label="Fecha" />
+        <input value={date} onChange={(e) => setDate(e.target.value)} className="w-full max-w-sm rounded-lg border border-white/20 bg-black/40 px-3 py-2" aria-label="Línea de actualización" />
         <div><button onClick={download} className="rounded-lg bg-orange-500 px-4 py-2 font-bold">Descargar PNG</button></div>
         <canvas ref={canvas} className="w-full max-w-md rounded-lg border border-white/10" />
       </section>

@@ -53,3 +53,10 @@ export const KIND_LABEL: Record<BrandKind, string> = {
   tires: "Marca de gomas",
   tires_gt: "Marca de gomas",
 };
+
+const BY_NAME = new Map<string, Brand>(
+  Object.values(BRANDS).flat().map((b) => [b.name.toLowerCase(), b] as [string, Brand]),
+);
+/** Logo de una marca por su nombre (undefined si no tiene logo o es texto libre de "OTRA"). */
+export const brandImageByName = (name?: string | null) =>
+  name ? BY_NAME.get(name.trim().toLowerCase())?.image : undefined;
