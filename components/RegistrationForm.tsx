@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { CATEGORIES, type Category } from "@/lib/categories";
+import { CATEGORIES, isNitro, type Category } from "@/lib/categories";
 import BrandPicker from "./BrandPicker";
 
 type Entry = { transponder: string; chassis_brand: string; engine_brand: string; tire_brand: string };
@@ -79,7 +79,7 @@ export default function RegistrationForm() {
             <input className={input} value={sel[c]!.transponder} onChange={(e) => upd(c, "transponder", e.target.value)} />
           </label>
           <BrandPicker kind="chassis" value={sel[c]!.chassis_brand} onChange={(v) => upd(c, "chassis_brand", v)} />
-          <BrandPicker kind="engine" value={sel[c]!.engine_brand} onChange={(v) => upd(c, "engine_brand", v)} />
+          <BrandPicker kind={isNitro(c) ? "engine_nitro" : "engine_eco"} value={sel[c]!.engine_brand} onChange={(v) => upd(c, "engine_brand", v)} />
           <BrandPicker kind="tires" value={sel[c]!.tire_brand} onChange={(v) => upd(c, "tire_brand", v)} />
         </section>
       ))}
