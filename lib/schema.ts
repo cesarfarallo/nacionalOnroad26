@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES, isNitro } from "./categories";
+import { CATEGORIES, EXCLUSIVE_GROUPS, isNitro } from "./categories";
 
 const brand = z.string().trim().min(1, "Elegí una marca").max(60);
 
@@ -27,6 +27,10 @@ export const registerSchema = z.object({
   entries: z
     .array(entrySchema)
     .min(1, "Elegí al menos una categoría")
-    .refine((e) => new Set(e.map((x) => x.category)).size === e.length, "Categoría repetida"),
+    .refine((e) => new Set(e.map((x) => x.category)).size === e.length, "Categoría repetida")
+    .refine(
+      (e) => EXCLUSIVE_GROUPS.every((g) => e.filter((x) => g.includes(x.category)).length <= 1),
+      "Touring Eco Modified y Touring Eco Stock son excluyentes: elegí solo una",
+    ),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
