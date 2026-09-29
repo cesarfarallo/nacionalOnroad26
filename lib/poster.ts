@@ -10,7 +10,7 @@ const ACCENT: Record<string, [string, string]> = {
 };
 
 export const displayName = (r: Row) =>
-  (r.nickname?.trim() || r.last_name).toUpperCase();
+  `${r.first_name} ${r.last_name}`.trim().toUpperCase();
 
 /** Dibuja una imagen tipo "PRE-INSCRIPCIÓN" con hasta 2 categorías por imagen. */
 export function drawPoster(canvas: HTMLCanvasElement, cats: string[], rows: Row[], dateText: string) {
