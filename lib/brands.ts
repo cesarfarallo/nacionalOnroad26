@@ -17,8 +17,8 @@ const CATALOG = {
   nova: b("Nova Engines", "nova-engines"), rapide: b("Rapide"), syncro: b("Syncro"), gimar: b("Gi-Mar", "gimar"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
   trinity: b("Trinity"), teamPowers: b("Team Powers"), muchmore: b("Muchmore"),
-  speedPassion: b("Speed Passion"), tekin: b("Tekin"), novak: b("Novak"), acuvance: b("Acuvance"),
-  cayote: b("Cayote"), ruddog: b("Ruddog"),
+  speedPassion: b("Speed Passion"), tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), acuvance: b("Acuvance"),
+  cayote: b("Cayote", "cayote"), ruddog: b("Ruddog"),
   sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"),
 };
 type Id = keyof typeof CATALOG;
