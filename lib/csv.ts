@@ -5,7 +5,7 @@ export type Row = {
   first_name: string; last_name: string; nickname: string | null; email: string;
   phone: string | null; club: string | null; created_at: string;
   category: string; transponder: string | null;
-  chassis_brand: string | null; engine_brand: string | null; tire_brand: string | null;
+  chassis_brand: string | null; engine_brand: string | null; esc_brand: string | null; tire_brand: string | null;
 };
 
 const esc = (v: string | null | undefined) => {
@@ -20,7 +20,7 @@ export function buildCsv(rows: Row[]) {
       FirstName: r.first_name, LastName: r.last_name, NickName: r.nickname ?? "",
       ClassName: r.category, IsPaid: "false", LocalRegisteredDateTime: r.created_at,
       TireNumber: r.tire_brand ?? "", Manufacturer: r.engine_brand ?? "",
-      ChassisManufacturer: r.chassis_brand ?? "", TransponderNumber: r.transponder ?? "",
+      ChassisManufacturer: r.chassis_brand ?? "", ModelName: r.esc_brand ? `ESC: ${r.esc_brand}` : "", TransponderNumber: r.transponder ?? "",
       Email: r.email, PhoneNumber: r.phone ?? "", ClubName: r.club ?? "",
     };
     return cols.map((c) => esc(m[c])).join(",");

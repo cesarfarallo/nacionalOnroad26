@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const { data: reg, error } = await sb.from("registrations").insert(person).select("id").single();
   if (error || !reg) return NextResponse.json({ error: "No se pudo guardar" }, { status: 500 });
   const { error: e2 } = await sb.from("entries").insert(
-    entries.map((e) => ({ ...e, transponder: e.transponder || null, registration_id: reg.id })),
+    entries.map((e) => ({ ...e, transponder: e.transponder || null, esc_brand: e.esc_brand || null, registration_id: reg.id })),
   );
   if (e2) {
     await sb.from("registrations").delete().eq("id", reg.id);

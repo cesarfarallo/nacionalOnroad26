@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES } from "./categories";
+import { CATEGORIES, isNitro } from "./categories";
 
 const brand = z.string().trim().min(1, "Elegí una marca").max(60);
 
@@ -8,7 +8,11 @@ export const entrySchema = z.object({
   transponder: z.string().trim().max(30).optional().default(""),
   chassis_brand: brand,
   engine_brand: brand,
+  esc_brand: z.string().trim().max(60).optional().default(""),
   tire_brand: brand,
+}).refine((e) => isNitro(e.category) || e.esc_brand.length > 0, {
+  message: "Elegí la marca de variador",
+  path: ["esc_brand"],
 });
 
 export const registerSchema = z.object({

@@ -3,8 +3,8 @@ import { useState } from "react";
 import { CATEGORIES, isNitro, type Category } from "@/lib/categories";
 import BrandPicker from "./BrandPicker";
 
-type Entry = { transponder: string; chassis_brand: string; engine_brand: string; tire_brand: string };
-const empty: Entry = { transponder: "", chassis_brand: "", engine_brand: "", tire_brand: "" };
+type Entry = { transponder: string; chassis_brand: string; engine_brand: string; esc_brand: string; tire_brand: string };
+const empty: Entry = { transponder: "", chassis_brand: "", engine_brand: "", esc_brand: "", tire_brand: "" };
 const input = "mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2";
 
 export default function RegistrationForm() {
@@ -23,8 +23,8 @@ export default function RegistrationForm() {
     setError("");
     const entries = CATEGORIES.filter((c) => sel[c]).map((c) => ({ category: c, ...sel[c]! }));
     for (const en of entries)
-      if (!en.chassis_brand.trim() || !en.engine_brand.trim() || !en.tire_brand.trim())
-        return setError(`Completá chasis, motor y gomas en ${en.category}`);
+      if (!en.chassis_brand.trim() || !en.engine_brand.trim() || !en.tire_brand.trim() || (!isNitro(en.category) && !en.esc_brand.trim()))
+        return setError(`Completá chasis, motor${isNitro(en.category) ? "" : ", variador"} y gomas en ${en.category}`);
     setState("sending");
     const r = await fetch("/api/register", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -80,6 +80,7 @@ export default function RegistrationForm() {
           </label>
           <BrandPicker kind="chassis" value={sel[c]!.chassis_brand} onChange={(v) => upd(c, "chassis_brand", v)} />
           <BrandPicker kind={isNitro(c) ? "engine_nitro" : "engine_eco"} value={sel[c]!.engine_brand} onChange={(v) => upd(c, "engine_brand", v)} />
+          {!isNitro(c) && <BrandPicker kind="esc" value={sel[c]!.esc_brand} onChange={(v) => upd(c, "esc_brand", v)} />}
           <BrandPicker kind="tires" value={sel[c]!.tire_brand} onChange={(v) => upd(c, "tire_brand", v)} />
         </section>
       ))}

@@ -53,13 +53,13 @@ export default function Admin() {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead><tr className="text-sky-300">{["Categoría", "Piloto", "Email", "Transp.", "Chasis", "Motor", "Gomas"].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead>
+          <thead><tr className="text-sky-300">{["Categoría", "Piloto", "Email", "Transp.", "Chasis", "Motor", "Variador", "Gomas"].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={i} className="border-t border-white/10">
                 <td className="p-2">{r.category}</td><td className="p-2">{r.first_name} {r.last_name}</td>
                 <td className="p-2">{r.email}</td><td className="p-2">{r.transponder}</td>
-                <td className="p-2">{r.chassis_brand}</td><td className="p-2">{r.engine_brand}</td><td className="p-2">{r.tire_brand}</td>
+                <td className="p-2">{r.chassis_brand}</td><td className="p-2">{r.engine_brand}</td><td className="p-2">{r.esc_brand}</td><td className="p-2">{r.tire_brand}</td>
               </tr>
             ))}
           </tbody>
