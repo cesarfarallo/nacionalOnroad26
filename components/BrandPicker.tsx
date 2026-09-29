@@ -9,16 +9,16 @@ export default function BrandPicker({
   const known = BRANDS[kind].some((b) => b.name === value);
   const [other, setOther] = useState(!!value && !known);
   return (
-    <fieldset className="mt-3">
-      <legend className="text-sm font-semibold text-sky-300">{KIND_LABEL[kind]}</legend>
-      <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+    <fieldset className="mt-2">
+      <legend className="text-xs font-semibold text-sky-300">{KIND_LABEL[kind]}</legend>
+      <div className="mt-1 grid grid-cols-4 gap-1.5 sm:grid-cols-6">
         {[...BRANDS[kind], { name: OTHER, image: undefined }].map((b) => {
           const selected = b.name === OTHER ? other : !other && value === b.name;
           return (
             <button
               type="button" key={b.name} aria-pressed={selected}
               onClick={() => { if (b.name === OTHER) { setOther(true); onChange(""); } else { setOther(false); onChange(b.name); } }}
-              className={`flex h-16 items-center justify-center rounded-lg border-2 p-1 text-sm font-bold transition ${b.image ? "bg-white" : "bg-white/5"} ${selected ? "border-sky-400 ring-2 ring-sky-400" : "border-white/10 hover:border-white/40"}`}
+              className={`flex h-10 items-center justify-center rounded-md border-2 p-1 text-[11px] font-bold leading-tight transition ${b.image ? "bg-white" : "bg-white/5"} ${selected ? "border-sky-400 ring-2 ring-sky-400" : "border-white/10 hover:border-white/40"}`}
             >
               {b.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -32,7 +32,7 @@ export default function BrandPicker({
         <input
           autoFocus value={value} onChange={(e) => onChange(e.target.value)} maxLength={60}
           placeholder="Escribí la marca" aria-label={`${KIND_LABEL[kind]} (otra)`}
-          className="mt-2 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2"
+          className="mt-1.5 w-full rounded-md border border-white/20 bg-black/40 px-3 py-1.5 text-sm"
         />
       )}
     </fieldset>
