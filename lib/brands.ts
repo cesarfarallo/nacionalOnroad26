@@ -4,7 +4,7 @@
 export type Brand = { name: string; image?: string };
 export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires";
 
-const b = (name: string, file?: string): Brand => ({ name, image: file ? `/brands/${file}.png` : undefined });
+const b = (name: string, file?: string, ext = "png"): Brand => ({ name, image: file ? `/brands/${file}.${ext}` : undefined });
 
 const CATALOG = {
   xray: b("Xray", "xray"), mugen: b("Mugen", "mugen"), serpent: b("Serpent", "serpent"),
@@ -19,7 +19,7 @@ const CATALOG = {
   trinity: b("Trinity"), teamPowers: b("Team Powers"), muchmore: b("Muchmore"),
   speedPassion: b("Speed Passion"), tekin: b("Tekin"), novak: b("Novak"), acuvance: b("Acuvance"),
   cayote: b("Cayote"), ruddog: b("Ruddog"),
-  sweep: b("Sweep"), pitShop: b("Pit Shop"), jaco: b("Jaco"), gravity: b("Gravity"), moment: b("Moment"),
+  sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"),
 };
 type Id = keyof typeof CATALOG;
 
@@ -38,7 +38,7 @@ const LISTS: Record<BrandKind, Id[]> = {
   ],
   engine_eco: ecoBrands,
   esc: [...ecoBrands, "ruddog"],
-  tires: ["sweep", "pitShop", "jaco", "gravity", "moment"],
+  tires: ["sweep", "matrix"],
 };
 
 export const BRANDS = Object.fromEntries(
