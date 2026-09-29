@@ -5,8 +5,14 @@ export type BrandKind = "chassis" | "engine" | "tires";
 
 export const BRANDS: Record<BrandKind, Brand[]> = {
   chassis: [
-    { name: "Mugen" }, { name: "Xray" }, { name: "Serpent" }, { name: "Kyosho" },
-    { name: "Tamiya" }, { name: "Team Associated" }, { name: "Yokomo" }, { name: "Schumacher" },
+    { name: "Xray", image: "/brands/chassis/xray.png" },
+    { name: "Mugen", image: "/brands/chassis/mugen.png" },
+    { name: "Serpent", image: "/brands/chassis/serpent.png" },
+    { name: "Shepherd", image: "/brands/chassis/shepherd.png" },
+    { name: "Team Associated", image: "/brands/chassis/team-associated.png" },
+    { name: "Losi" },
+    { name: "3Racing" },
+    { name: "Awesomatix" },
   ],
   engine: [
     { name: "Novarossi" }, { name: "Picco" }, { name: "Sirio" }, { name: "Hobbywing" },

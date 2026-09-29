@@ -18,7 +18,7 @@ export default function BrandPicker({
             <button
               type="button" key={b.name} aria-pressed={selected}
               onClick={() => { if (b.name === OTHER) { setOther(true); onChange(""); } else { setOther(false); onChange(b.name); } }}
-              className={`flex h-16 items-center justify-center rounded-lg border-2 bg-white/5 p-1 text-sm font-bold transition ${selected ? "border-sky-400 bg-sky-500/20" : "border-white/10 hover:border-white/40"}`}
+              className={`flex h-16 items-center justify-center rounded-lg border-2 p-1 text-sm font-bold transition ${b.image ? "bg-white" : "bg-white/5"} ${selected ? "border-sky-400 ring-2 ring-sky-400" : "border-white/10 hover:border-white/40"}`}
             >
               {b.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
