@@ -16,7 +16,7 @@ export async function sendPaymentConfirmation({ to, name, categories }: PaymentM
     `Recibimos y verificamos tu pago. ¡Tu inscripción al AAPARTT Nacional Onroad está confirmada!\n\n` +
     `Categorías: ${cats}\n` +
     `Fechas: 20, 21 y 22 de noviembre\n` +
-    `Lugar: Circuito Hernán Maticoli, Buenos Aires\n\n` +
+    `Lugar: Circuito Hernán Matticoli, Buenos Aires\n\n` +
     `Cualquier duda, consultá por WhatsApp al 11 5489-1392.\n\n¡Nos vemos en la pista!`;
   const html =
     `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#111">` +
@@ -25,7 +25,7 @@ export async function sendPaymentConfirmation({ to, name, categories }: PaymentM
     `<p>Recibimos y verificamos tu pago. Tu inscripción al <strong>AAPARTT Nacional Onroad</strong> está confirmada.</p>` +
     `<ul><li><strong>Categorías:</strong> ${esc(cats)}</li>` +
     `<li><strong>Fechas:</strong> 20, 21 y 22 de noviembre</li>` +
-    `<li><strong>Lugar:</strong> Circuito Hernán Maticoli, Buenos Aires</li></ul>` +
+    `<li><strong>Lugar:</strong> Circuito Hernán Matticoli, Buenos Aires</li></ul>` +
     `<p>Cualquier duda, consultá por WhatsApp al <a href="https://wa.me/5491154891392">11 5489-1392</a>.</p>` +
     `<p>¡Nos vemos en la pista!</p></div>`;
 

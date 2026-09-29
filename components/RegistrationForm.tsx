@@ -61,7 +61,7 @@ export default function RegistrationForm() {
     return (
       <div className="m-4 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-6 text-center">
         <h2 className="text-2xl font-black">¡Inscripción recibida!</h2>
-        <p className="mt-2">Nos vemos en el Circuito Hernán Maticoli.</p>
+        <p className="mt-2">Nos vemos en el Circuito Hernán Matticoli.</p>
       </div>
     );
 
