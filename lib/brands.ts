@@ -14,18 +14,16 @@ const CATALOG = {
   schumacher: b("Schumacher", "schumacher"),
   novarossi: b("Novarossi", "novarossi"), picco: b("Picco", "picco"), sirio: b("Sirio", "sirio"),
   osSpeed: b("O.S. Speed", "os-speed"), reds: b("REDS", "reds"), orion: b("Team Orion", "team-orion"),
-  nova: b("Nova Engines", "nova-engines"), rapide: b("Rapide"), syncro: b("Syncro"), gimar: b("Gi-Mar", "gimar"),
+  nova: b("Nova Engines", "nova-engines"), gimar: b("Gi-Mar", "gimar"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
-  trinity: b("Trinity"), teamPowers: b("Team Powers"), muchmore: b("Muchmore"),
-  speedPassion: b("Speed Passion"), tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), acuvance: b("Acuvance"),
-  cayote: b("Cayote", "cayote"), ruddog: b("Ruddog"),
+  trinity: b("Trinity"), // falta logo
+  tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
   sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"),
 };
 type Id = keyof typeof CATALOG;
 
 const ecoBrands: Id[] = [
-  "hobbywing", "orca", "trinity", "teamPowers", "muchmore", "speedPassion",
-  "reedy", "orion", "lrp", "tekin", "novak", "acuvance", "cayote",
+  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote",
 ];
 
 const LISTS: Record<BrandKind, Id[]> = {
@@ -34,10 +32,10 @@ const LISTS: Record<BrandKind, Id[]> = {
     "awesomatix", "kyosho", "tamiya", "yokomo", "schumacher",
   ],
   engine_nitro: [
-    "novarossi", "picco", "sirio", "osSpeed", "reds", "orion", "nova", "rapide", "syncro", "gimar",
+    "novarossi", "picco", "sirio", "osSpeed", "reds", "orion", "nova", "gimar",
   ],
   engine_eco: ecoBrands,
-  esc: [...ecoBrands, "ruddog"],
+  esc: ecoBrands,
   tires: ["sweep", "matrix"],
 };
 
