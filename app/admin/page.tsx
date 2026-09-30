@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
-import { csvWarnings, DATE_MODES, isDateMode, type DateMode, type Row } from "@/lib/csv";
+import { csvWarnings, DATE_CLOCKS, DATE_ORDERS, parseDateMode, type DateClock, type DateMode, type DateOrder, type Row } from "@/lib/csv";
 import { Oswald } from "next/font/google";
 import { drawPoster } from "@/lib/poster";
 
@@ -35,8 +35,21 @@ export default function Admin() {
     }
     return [...m.values()];
   }, [rows]);
-  const [dateMode, setDateMode] = useState<DateMode>("dmy24");
-  useEffect(() => { try { const v = localStorage.getItem("csvDateMode"); if (isDateMode(v)) setDateMode(v); } catch { /* sin almacenamiento */ } }, []);
+  // Formato de fecha del CSV: orden + hora por separado (así, al pasar por "Sin fecha" no se pierde el orden elegido)
+  const [order, setOrder] = useState<DateOrder>("dmy");
+  const [clock, setClock] = useState<DateClock | "none">("24");
+  const dateMode: DateMode = clock === "none" ? "none" : `${order}-${clock}`;
+  useEffect(() => {
+    try {
+      const v = parseDateMode(localStorage.getItem("csvDateMode"));
+      if (v !== "none") setOrder(v.split("-")[0] as DateOrder);
+      setClock(v === "none" ? "none" : (v.split("-")[1] as DateClock));
+    } catch { /* sin almacenamiento */ }
+  }, []);
+  const chooseDate = (o: DateOrder, c: DateClock | "none") => {
+    setOrder(o); setClock(c);
+    try { localStorage.setItem("csvDateMode", c === "none" ? "none" : `${o}-${c}`); } catch { /* ignorar */ }
+  };
   const warn = useMemo(() => csvWarnings(rows ?? []), [rows]);
   const [busy, setBusy] = useState<string | null>(null);
   const [payMsg, setPayMsg] = useState("");
@@ -127,14 +140,20 @@ export default function Admin() {
       <h1 className="text-2xl font-black">Inscriptos ({rows.length} inscripciones)</h1>
       <div className="flex flex-wrap gap-3">
         <a href={`/api/admin/export?date=${dateMode}`} className="rounded-lg bg-emerald-500 px-4 py-2 font-bold">Descargar CSV (GenericImport)</a>
-        <label className="flex items-center gap-2 text-sm">
-          Formato de fecha
-          <select value={dateMode} aria-label="Formato de fecha del CSV"
-            onChange={(e) => { const v = e.target.value as DateMode; setDateMode(v); try { localStorage.setItem("csvDateMode", v); } catch { /* ignorar */ } }}
-            className="rounded-lg border border-white/20 bg-black/40 px-2 py-2">
-            {DATE_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+        <fieldset className="flex flex-wrap items-center gap-2 text-sm">
+          <legend className="sr-only">Formato de fecha del CSV</legend>
+          <span>Formato de fecha</span>
+          <select value={order} disabled={dateMode === "none"} aria-label="Orden de la fecha"
+            onChange={(e) => chooseDate(e.target.value as DateOrder, clock)}
+            className="rounded-lg border border-white/20 bg-black/40 px-2 py-2 disabled:opacity-40">
+            {DATE_ORDERS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
-        </label>
+          <select value={clock} aria-label="Formato de la hora"
+            onChange={(e) => chooseDate(order, e.target.value as DateClock | "none")}
+            className="rounded-lg border border-white/20 bg-black/40 px-2 py-2">
+            {DATE_CLOCKS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+          </select>
+        </fieldset>
         <button onClick={load} className="rounded-lg bg-white/10 px-4 py-2">Actualizar</button>
       </div>
       {(warn.chassisNotInList > 0 || warn.transponderNotNumeric > 0) && (
