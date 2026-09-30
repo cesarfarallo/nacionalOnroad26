@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
-import { csvWarnings, type Row } from "@/lib/csv";
+import { csvWarnings, DATE_MODES, isDateMode, type DateMode, type Row } from "@/lib/csv";
 import { Oswald } from "next/font/google";
 import { drawPoster } from "@/lib/poster";
 
@@ -35,6 +35,8 @@ export default function Admin() {
     }
     return [...m.values()];
   }, [rows]);
+  const [dateMode, setDateMode] = useState<DateMode>("dmy24");
+  useEffect(() => { try { const v = localStorage.getItem("csvDateMode"); if (isDateMode(v)) setDateMode(v); } catch { /* sin almacenamiento */ } }, []);
   const warn = useMemo(() => csvWarnings(rows ?? []), [rows]);
   const [busy, setBusy] = useState<string | null>(null);
   const [payMsg, setPayMsg] = useState("");
@@ -124,7 +126,15 @@ export default function Admin() {
     <main className="mx-auto max-w-5xl space-y-6 p-4">
       <h1 className="text-2xl font-black">Inscriptos ({rows.length} inscripciones)</h1>
       <div className="flex flex-wrap gap-3">
-        <a href="/api/admin/export" className="rounded-lg bg-emerald-500 px-4 py-2 font-bold">Descargar CSV (GenericImport)</a>
+        <a href={`/api/admin/export?date=${dateMode}`} className="rounded-lg bg-emerald-500 px-4 py-2 font-bold">Descargar CSV (GenericImport)</a>
+        <label className="flex items-center gap-2 text-sm">
+          Formato de fecha
+          <select value={dateMode} aria-label="Formato de fecha del CSV"
+            onChange={(e) => { const v = e.target.value as DateMode; setDateMode(v); try { localStorage.setItem("csvDateMode", v); } catch { /* ignorar */ } }}
+            className="rounded-lg border border-white/20 bg-black/40 px-2 py-2">
+            {DATE_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+          </select>
+        </label>
         <button onClick={load} className="rounded-lg bg-white/10 px-4 py-2">Actualizar</button>
       </div>
       {(warn.chassisNotInList > 0 || warn.transponderNotNumeric > 0) && (

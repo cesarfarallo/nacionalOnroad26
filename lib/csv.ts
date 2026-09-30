@@ -43,16 +43,39 @@ export const liveTimeChassis = (brand: string | null | undefined) => CHASSIS_BY_
 /** El import espera un entero; cualquier otra cosa se exporta vacía. */
 export const liveTimeTransponder = (t: string | null | undefined) => (/^\d+$/.test((t ?? "").trim()) ? (t ?? "").trim() : "");
 
+/**
+ * Formatos de fecha para LocalRegisteredDateTime. LiveTime la lee con el formato de fecha de la computadora/programa,
+ * y la guía solo da un ejemplo en inglés; por eso es configurable al exportar:
+ * - dmy24: 30/9/2026 14:23:49   (Día/Mes/Año, 24 h, sin AM/PM: lo más compatible con Windows en español)
+ * - mdy12: 9/30/2026 02:23:49 PM (el formato del ejemplo de la guía)
+ * - none:  campo vacío (es opcional; solo sirve para sembrar/auditar)
+ */
+export type DateMode = "dmy24" | "mdy12" | "none";
+export const DATE_MODES: { value: DateMode; label: string }[] = [
+  { value: "dmy24", label: "Día/Mes/Año, 24 h (30/9/2026 14:23:49)" },
+  { value: "mdy12", label: "Mes/Día/Año, AM/PM (9/30/2026 02:23:49 PM)" },
+  { value: "none", label: "Sin fecha (campo vacío)" },
+];
+export const isDateMode = (v: unknown): v is DateMode => DATE_MODES.some((m) => m.value === v);
+
 const DATE_FMT = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "numeric", day: "numeric",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+});
+const DATE_FMT_12 = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Argentina/Buenos_Aires", year: "numeric", month: "numeric", day: "numeric",
   hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true,
 });
-/** Formato que pide la guía: M/d/yyyy hh:mm:ss AM|PM (ej. 4/21/2024 11:50:30 PM), en hora de Argentina. */
-export function liveTimeDate(iso: string) {
+/** Fecha de inscripción en hora de Argentina, según el formato elegido. */
+export function liveTimeDate(iso: string, mode: DateMode = "dmy24") {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
+  if (mode === "none" || Number.isNaN(d.getTime())) return "";
+  if (mode === "mdy12") {
+    const p = Object.fromEntries(DATE_FMT_12.formatToParts(d).map((x) => [x.type, x.value]));
+    return `${p.month}/${p.day}/${p.year} ${p.hour}:${p.minute}:${p.second} ${String(p.dayPeriod).toUpperCase()}`;
+  }
   const p = Object.fromEntries(DATE_FMT.formatToParts(d).map((x) => [x.type, x.value]));
-  return `${p.month}/${p.day}/${p.year} ${p.hour}:${p.minute}:${p.second} ${String(p.dayPeriod).toUpperCase()}`;
+  return `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}:${p.second}`;
 }
 
 /** Datos que no entran en el CSV de importación (para avisar en el panel). */
@@ -67,14 +90,14 @@ export function csvWarnings(rows: Row[]) {
  * CSV para Data/Event > Import de LiveTime (GenericImport.csv). Solo se exporta lo que el import admite:
  * motor, variador y marca de gomas no tienen campo equivalente en la edición RC (Manufacturer es de MX/KART/MS/DRAG,
  * TireNumber es un código de 4 caracteres, ModelName es el modelo del vehículo), así que salen vacíos.
- * UTF-8 sin BOM y CRLF, igual que el archivo de ejemplo de LiveTime.
+ * UTF-8 sin BOM y CRLF, igual que el archivo de ejemplo de LiveTime. El formato de fecha se elige con `dateMode`.
  */
-export function buildCsv(rows: Row[]) {
+export function buildCsv(rows: Row[], dateMode: DateMode = "dmy24") {
   const cols = CSV_HEADER.split(",");
   const lines = rows.map((r) => {
     const m: Record<string, string> = {
       FirstName: r.first_name, LastName: r.last_name, NickName: r.nickname ?? "",
-      ClassName: r.category, IsPaid: r.paid ? "true" : "false", LocalRegisteredDateTime: liveTimeDate(r.created_at),
+      ClassName: r.category, IsPaid: r.paid ? "true" : "false", LocalRegisteredDateTime: liveTimeDate(r.created_at, dateMode),
       ChassisManufacturer: liveTimeChassis(r.chassis_brand), TransponderNumber: liveTimeTransponder(r.transponder),
       Email: r.email, PhoneNumber: r.phone ?? "", ClubName: r.club ?? "",
     };
