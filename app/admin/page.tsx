@@ -38,6 +38,26 @@ export default function Admin() {
   const [busy, setBusy] = useState<string | null>(null);
   const [payMsg, setPayMsg] = useState("");
 
+  async function removePilot(p: { id: string; name: string; paid: boolean; cats: string[] }) {
+    if (p.paid) {
+      const typed = window.prompt(
+        `ATENCIÓN: ${p.name} figura como PAGADO.\n\nSi la eliminás, se pierde ese registro de pago y no se puede deshacer.\n\nPara confirmar, escribí ELIMINAR:`,
+      );
+      if (typed === null) return;
+      if (typed.trim().toUpperCase() !== "ELIMINAR") { setPayMsg("No se eliminó: la palabra de confirmación no coincidía."); return; }
+    } else if (!window.confirm(`¿Eliminar la inscripción de ${p.name} (${p.cats.join(", ")})?\n\nEsta acción no se puede deshacer.`)) return;
+    setBusy(p.id); setPayMsg("");
+    try {
+      const r = await fetch("/api/admin/registrations", {
+        method: "DELETE", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ registrationId: p.id }),
+      });
+      const j = await r.json().catch(() => ({}));
+      setPayMsg(r.ok ? `Se eliminó la inscripción de ${p.name}.` : j.error ?? "No se pudo eliminar la inscripción");
+      if (r.ok || r.status === 404) await load();
+    } finally { setBusy(null); }
+  }
+
   async function togglePaid(p: { id: string; name: string; email: string; optin: boolean; paid: boolean }) {
     const paid = !p.paid;
     const ask = !paid
@@ -111,7 +131,7 @@ export default function Admin() {
         {payMsg && <p role="status" className="rounded-lg bg-white/10 p-2 text-sm">{payMsg}</p>}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead><tr className="text-sky-300">{["Pagó", "Piloto", "Email", "Categorías", "Acepta mails"].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead>
+            <thead><tr className="text-sky-300">{["Pagó", "Piloto", "Email", "Categorías", "Acepta mails", ""].map((h) => <th key={h} className="p-2">{h}</th>)}</tr></thead>
             <tbody>
               {pilots.map((p) => (
                 <tr key={p.id} className="border-t border-white/10">
@@ -122,6 +142,13 @@ export default function Admin() {
                   <td className="p-2">{p.name}</td><td className="p-2">{p.email}</td>
                   <td className="p-2">{p.cats.join(", ")}</td>
                   <td className="p-2">{p.optin ? "Sí" : "No"}</td>
+                  <td className="p-2 text-right">
+                    <button type="button" onClick={() => removePilot(p)} disabled={busy === p.id}
+                      aria-label={`Eliminar la inscripción de ${p.name}`}
+                      className="rounded-md border border-red-400/60 px-2 py-1 text-xs font-bold text-red-300 hover:bg-red-500/20 disabled:opacity-40">
+                      Eliminar
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
