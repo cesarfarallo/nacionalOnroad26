@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES } from "@/lib/categories";
-import type { Row } from "@/lib/csv";
+import { csvWarnings, type Row } from "@/lib/csv";
 import { Oswald } from "next/font/google";
 import { drawPoster } from "@/lib/poster";
 
@@ -35,6 +35,7 @@ export default function Admin() {
     }
     return [...m.values()];
   }, [rows]);
+  const warn = useMemo(() => csvWarnings(rows ?? []), [rows]);
   const [busy, setBusy] = useState<string | null>(null);
   const [payMsg, setPayMsg] = useState("");
 
@@ -126,6 +127,12 @@ export default function Admin() {
         <a href="/api/admin/export" className="rounded-lg bg-emerald-500 px-4 py-2 font-bold">Descargar CSV (GenericImport)</a>
         <button onClick={load} className="rounded-lg bg-white/10 px-4 py-2">Actualizar</button>
       </div>
+      {(warn.chassisNotInList > 0 || warn.transponderNotNumeric > 0) && (
+        <ul role="note" className="space-y-1 rounded-lg bg-amber-500/15 p-3 text-sm text-amber-100">
+          {warn.chassisNotInList > 0 && <li>{warn.chassisNotInList} inscripción(es) tienen un chasis que no figura en la lista de LiveTime: salen con el chasis vacío en el CSV (siguen guardadas acá).</li>}
+          {warn.transponderNotNumeric > 0 && <li>{warn.transponderNotNumeric} inscripción(es) tienen un transponder que no es un número: salen vacías en el CSV.</li>}
+        </ul>
+      )}
       <section className="space-y-2">
         <h2 className="text-xl font-black">Pagos ({pilots.filter((p) => p.paid).length}/{pilots.length} pagaron)</h2>
         {payMsg && <p role="status" className="rounded-lg bg-white/10 p-2 text-sm">{payMsg}</p>}

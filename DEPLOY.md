@@ -35,3 +35,11 @@ En `/admin`, la sección **Pagos** tiene un tilde por piloto. Al tildarlo pide c
 
 ## 5. Verificar
 Inscribirse en la URL de preview, comprobar la fila en Table Editor (proyecto dev), entrar a `/admin` con `ADMIN_PASSWORD` y descargar CSV e imagen.
+
+## Importar a LiveTime (GenericImport.csv)
+El botón **Descargar CSV (GenericImport)** de `/admin` genera el archivo según la *LiveTime Import and Export Guide* (edición RC):
+
+- **Sale en el CSV:** nombre, apellido, clase (`ClassName`), pagado (`IsPaid`), fecha de inscripción (`M/d/yyyy hh:mm:ss AM|PM`, hora de Argentina), chasis (`ChassisManufacturer`, con el nombre exacto de la lista de LiveTime), transponder (solo si es un número) y email.
+- **No sale (queda en la base y en el panel):** marca de motor, variador y marca de gomas, porque el import no tiene un campo equivalente (`Manufacturer` es de otras ediciones, `TireNumber` es un código de 4 caracteres y `ModelName` es el modelo del vehículo). Un chasis que no figura en la lista de LiveTime (por ejemplo uno cargado con "OTRA") sale vacío; el panel avisa cuántos son.
+- Las clases del evento en LiveTime tienen que llamarse exactamente `1/8 SP`, `GT Eco`, `GT Nitro`, `Touring Eco Modified` y `Touring Eco Stock`.
+- Antes de importar, hacé un **backup** de la base de LiveTime (el import no se puede deshacer) y probá primero con **una sola fila**.
