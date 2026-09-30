@@ -6,6 +6,8 @@ const W = 1080;
 const M = 40; // margen lateral
 const BANNER_H = 470;
 const TITLE_H = 130;
+const LEGEND_H = 44; // renglón extra bajo el título cuando hay pilotos con pago confirmado
+const PAID = "#22c55e";
 const CAT_H = 66;
 const HEAD_H = 46;
 const ROW_H = 58;
@@ -46,6 +48,15 @@ function loadImage(src: string) {
     cache.set(src, p);
   }
   return p;
+}
+
+/** Tilde verde (círculo + check dibujado con trazos, sin depender de la tipografía). */
+function paidBadge(g: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  g.save();
+  g.fillStyle = PAID; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = "#ffffff"; g.lineWidth = Math.max(3, r / 4); g.lineCap = "round"; g.lineJoin = "round";
+  g.beginPath(); g.moveTo(cx - r * 0.42, cy + r * 0.02); g.lineTo(cx - r * 0.1, cy + r * 0.34); g.lineTo(cx + r * 0.46, cy - r * 0.32); g.stroke();
+  g.restore();
 }
 
 export type PosterOptions = {
@@ -97,7 +108,9 @@ export async function drawPoster(
   if (opts.isCancelled?.()) return;
 
   const bodyH = blocks.reduce((h, b) => h + CAT_H + HEAD_H + Math.max(b.rows.length, 1) * (ROW_H + ROW_GAP) + BLOCK_GAP, 0);
-  const H = BANNER_H + TITLE_H + bodyH + FOOTER_H;
+  const anyPaid = blocks.some((b) => b.rows.some((r) => r.paid));
+  const titleH = TITLE_H + (anyPaid ? LEGEND_H : 0);
+  const H = BANNER_H + titleH + bodyH + FOOTER_H;
   canvas.width = W; canvas.height = H;
   const g = canvas.getContext("2d")!;
 
@@ -126,7 +139,15 @@ export async function drawPoster(
   g.restore();
   g.fillStyle = "rgba(255,255,255,0.75)";
   fitText(g, updateLine, W / 2, y + 100, W - 2 * M, 28, "500", family, "center");
-  y += TITLE_H;
+  if (anyPaid) { // leyenda: qué significa el tilde
+    const label = "INSCRIPCIÓN PAGA";
+    g.font = "500 26px " + family;
+    const w = g.measureText(label).width + 44;
+    paidBadge(g, W / 2 - w / 2 + 14, y + 140, 14);
+    g.fillStyle = "rgba(255,255,255,0.85)";
+    g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(label, W / 2 - w / 2 + 38, y + 141);
+  }
+  y += titleH;
 
   const tableW = W - 2 * M;
   const numW = 70;
@@ -170,7 +191,8 @@ export async function drawPoster(
       // nombre
       g.fillStyle = "#ffffff"; g.fillRect(xName, y, nameW, ROW_H);
       g.fillStyle = "#0b0f1a";
-      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28, 30, "700", family);
+      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28 - (r.paid ? 40 : 0), 30, "700", family);
+      if (r.paid) paidBadge(g, xName + nameW - 26, y + ROW_H / 2, 15);
       // marcas
       b.cols.forEach((c, k) => {
         const x = xCol(k);
