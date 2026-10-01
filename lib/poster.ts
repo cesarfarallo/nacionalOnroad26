@@ -50,12 +50,17 @@ function loadImage(src: string) {
   return p;
 }
 
-/** Tilde verde (círculo + check dibujado con trazos, sin depender de la tipografía). */
-function paidBadge(g: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+/** Billete verde (con "$" al centro), dibujado con formas: no depende de emojis ni de la tipografía. */
+function paidBill(g: CanvasRenderingContext2D, cx: number, cy: number, w: number, family: string) {
+  const h = w * 0.62, x = cx - w / 2, y = cy - h / 2;
   g.save();
-  g.fillStyle = PAID; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
-  g.strokeStyle = "#ffffff"; g.lineWidth = Math.max(3, r / 4); g.lineCap = "round"; g.lineJoin = "round";
-  g.beginPath(); g.moveTo(cx - r * 0.42, cy + r * 0.02); g.lineTo(cx - r * 0.1, cy + r * 0.34); g.lineTo(cx + r * 0.46, cy - r * 0.32); g.stroke();
+  g.fillStyle = "#15803d"; g.beginPath(); g.roundRect(x, y, w, h, h * 0.16); g.fill();      // borde oscuro
+  g.fillStyle = PAID; g.beginPath(); g.roundRect(x + 2, y + 2, w - 4, h - 4, h * 0.12); g.fill(); // cuerpo
+  g.strokeStyle = "rgba(255,255,255,0.55)"; g.lineWidth = 1.5;
+  g.beginPath(); g.roundRect(x + h * 0.16, y + h * 0.16, w - h * 0.32, h - h * 0.32, h * 0.08); g.stroke(); // filete interior
+  g.fillStyle = "#ffffff"; g.beginPath(); g.arc(cx, cy, h * 0.3, 0, Math.PI * 2); g.fill();  // medallón
+  g.fillStyle = "#15803d"; g.font = `700 ${Math.round(h * 0.46)}px ${family}`;
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("$", cx, cy + h * 0.03);
   g.restore();
 }
 
@@ -139,13 +144,13 @@ export async function drawPoster(
   g.restore();
   g.fillStyle = "rgba(255,255,255,0.75)";
   fitText(g, updateLine, W / 2, y + 100, W - 2 * M, 28, "500", family, "center");
-  if (anyPaid) { // leyenda: qué significa el tilde
+  if (anyPaid) { // leyenda: qué significa el billete
     const label = "INSCRIPCIÓN PAGA";
     g.font = "500 26px " + family;
-    const w = g.measureText(label).width + 44;
-    paidBadge(g, W / 2 - w / 2 + 14, y + 140, 14);
+    const w = g.measureText(label).width + 56;
+    paidBill(g, W / 2 - w / 2 + 20, y + 140, 40, family);
     g.fillStyle = "rgba(255,255,255,0.85)";
-    g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(label, W / 2 - w / 2 + 38, y + 141);
+    g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(label, W / 2 - w / 2 + 52, y + 141);
   }
   y += titleH;
 
@@ -191,8 +196,8 @@ export async function drawPoster(
       // nombre
       g.fillStyle = "#ffffff"; g.fillRect(xName, y, nameW, ROW_H);
       g.fillStyle = "#0b0f1a";
-      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28 - (r.paid ? 40 : 0), 30, "700", family);
-      if (r.paid) paidBadge(g, xName + nameW - 26, y + ROW_H / 2, 15);
+      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28 - (r.paid ? 52 : 0), 30, "700", family);
+      if (r.paid) paidBill(g, xName + nameW - 34, y + ROW_H / 2, 44, family);
       // marcas
       b.cols.forEach((c, k) => {
         const x = xCol(k);
