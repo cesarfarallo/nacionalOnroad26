@@ -194,14 +194,13 @@ export async function drawPoster(
       g.fillStyle = "#ffffff";
       fitText(g, String(i + 1), xNum + numW / 2 + 3, y + ROW_H / 2, numW - 16, 34, "700", family, "center");
       // nombre
-      g.fillStyle = "#ffffff"; g.fillRect(xName, y, nameW, ROW_H);
+      g.fillStyle = "#ffffff"; g.fillRect(xName, y, tableW - numW - 6, ROW_H); // una sola franja blanca: nombre + logos
       g.fillStyle = "#0b0f1a";
       fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28 - (r.paid ? 52 : 0), 30, "700", family);
       if (r.paid) paidBill(g, xName + nameW - 34, y + ROW_H / 2, 44, family);
       // marcas
       b.cols.forEach((c, k) => {
         const x = xCol(k);
-        g.fillStyle = "#ffffff"; g.fillRect(x, y, brandW, ROW_H);
         const value = r[c.key];
         const url = brandImageByName(value);
         const img = url ? imgs.get(url) : null;
