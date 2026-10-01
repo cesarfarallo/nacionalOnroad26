@@ -6,6 +6,8 @@ const W = 1080;
 const M = 40; // margen lateral
 const BANNER_H = 470;
 const TITLE_H = 130;
+const LEGEND_H = 44; // renglón extra bajo el título cuando hay pilotos con pago confirmado
+const PAID = "#22c55e";
 const CAT_H = 66;
 const HEAD_H = 46;
 const ROW_H = 58;
@@ -46,6 +48,20 @@ function loadImage(src: string) {
     cache.set(src, p);
   }
   return p;
+}
+
+/** Billete verde (con "$" al centro), dibujado con formas: no depende de emojis ni de la tipografía. */
+function paidBill(g: CanvasRenderingContext2D, cx: number, cy: number, w: number, family: string) {
+  const h = w * 0.62, x = cx - w / 2, y = cy - h / 2;
+  g.save();
+  g.fillStyle = "#15803d"; g.beginPath(); g.roundRect(x, y, w, h, h * 0.16); g.fill();      // borde oscuro
+  g.fillStyle = PAID; g.beginPath(); g.roundRect(x + 2, y + 2, w - 4, h - 4, h * 0.12); g.fill(); // cuerpo
+  g.strokeStyle = "rgba(255,255,255,0.55)"; g.lineWidth = 1.5;
+  g.beginPath(); g.roundRect(x + h * 0.16, y + h * 0.16, w - h * 0.32, h - h * 0.32, h * 0.08); g.stroke(); // filete interior
+  g.fillStyle = "#ffffff"; g.beginPath(); g.arc(cx, cy, h * 0.3, 0, Math.PI * 2); g.fill();  // medallón
+  g.fillStyle = "#15803d"; g.font = `700 ${Math.round(h * 0.46)}px ${family}`;
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("$", cx, cy + h * 0.03);
+  g.restore();
 }
 
 export type PosterOptions = {
@@ -97,7 +113,9 @@ export async function drawPoster(
   if (opts.isCancelled?.()) return;
 
   const bodyH = blocks.reduce((h, b) => h + CAT_H + HEAD_H + Math.max(b.rows.length, 1) * (ROW_H + ROW_GAP) + BLOCK_GAP, 0);
-  const H = BANNER_H + TITLE_H + bodyH + FOOTER_H;
+  const anyPaid = blocks.some((b) => b.rows.some((r) => r.paid));
+  const titleH = TITLE_H + (anyPaid ? LEGEND_H : 0);
+  const H = BANNER_H + titleH + bodyH + FOOTER_H;
   canvas.width = W; canvas.height = H;
   const g = canvas.getContext("2d")!;
 
@@ -126,7 +144,15 @@ export async function drawPoster(
   g.restore();
   g.fillStyle = "rgba(255,255,255,0.75)";
   fitText(g, updateLine, W / 2, y + 100, W - 2 * M, 28, "500", family, "center");
-  y += TITLE_H;
+  if (anyPaid) { // leyenda: qué significa el billete
+    const label = "INSCRIPCIÓN PAGA";
+    g.font = "500 26px " + family;
+    const w = g.measureText(label).width + 56;
+    paidBill(g, W / 2 - w / 2 + 20, y + 140, 40, family);
+    g.fillStyle = "rgba(255,255,255,0.85)";
+    g.textAlign = "left"; g.textBaseline = "middle"; g.fillText(label, W / 2 - w / 2 + 52, y + 141);
+  }
+  y += titleH;
 
   const tableW = W - 2 * M;
   const numW = 70;
@@ -168,13 +194,13 @@ export async function drawPoster(
       g.fillStyle = "#ffffff";
       fitText(g, String(i + 1), xNum + numW / 2 + 3, y + ROW_H / 2, numW - 16, 34, "700", family, "center");
       // nombre
-      g.fillStyle = "#ffffff"; g.fillRect(xName, y, nameW, ROW_H);
+      g.fillStyle = "#ffffff"; g.fillRect(xName, y, tableW - numW - 6, ROW_H); // una sola franja blanca: nombre + logos
       g.fillStyle = "#0b0f1a";
-      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28, 30, "700", family);
+      fitText(g, displayName(r), xName + 16, y + ROW_H / 2, nameW - 28 - (r.paid ? 52 : 0), 30, "700", family);
+      if (r.paid) paidBill(g, xName + nameW - 34, y + ROW_H / 2, 44, family);
       // marcas
       b.cols.forEach((c, k) => {
         const x = xCol(k);
-        g.fillStyle = "#ffffff"; g.fillRect(x, y, brandW, ROW_H);
         const value = r[c.key];
         const url = brandImageByName(value);
         const img = url ? imgs.get(url) : null;
