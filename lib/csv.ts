@@ -34,7 +34,7 @@ const LIVETIME_CHASSIS = [
 const norm = (v: string) => v.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 const CHASSIS_BY_KEY = new Map(LIVETIME_CHASSIS.map((n) => [norm(n), n]));
 // Nombres que usa el formulario y difieren de la lista oficial
-for (const [alias, official] of [["mugen", "Mugen Seiki"], ["shepherd", "Shepherd Racing"], ["associated", "Team Associated"]] as const)
+for (const [alias, official] of [["mugen", "Mugen Seiki"], ["shepherd", "Shepherd Racing"], ["associated", "Team Associated"], ["hotbodies", "HB Racing"]] as const)
   CHASSIS_BY_KEY.set(alias, official);
 
 /** Nombre del chasis según la lista de LiveTime, o "" si no figura (en ese caso se exporta vacío). */

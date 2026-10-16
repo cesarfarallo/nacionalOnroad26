@@ -111,7 +111,7 @@ export default function AdminEditDialog({
                 </button>
               </div>
               {/* key = categoría: al cambiarla se vuelve a armar cada selector con la lista que corresponde */}
-              <BrandPicker key={`c-${e.category}`} kind={isTouring(e.category) ? "chassis_touring" : "chassis"} value={e.chassis_brand} onChange={(v) => upd(e.key, { chassis_brand: v })} />
+              <BrandPicker key={`c-${e.category}`} kind={isTouring(e.category) ? "chassis_touring" : isGT(e.category) ? "chassis_gt" : "chassis"} value={e.chassis_brand} onChange={(v) => upd(e.key, { chassis_brand: v })} />
               <BrandPicker key={`m-${e.category}`} kind={isNitro(e.category) ? "engine_nitro" : "engine_eco"} value={e.engine_brand} onChange={(v) => upd(e.key, { engine_brand: v })} />
               {!isNitro(e.category) && <BrandPicker key={`v-${e.category}`} kind="esc" value={e.esc_brand} onChange={(v) => upd(e.key, { esc_brand: v })} />}
               <BrandPicker key={`g-${e.category}`} kind={isGT(e.category) ? "tires_gt" : "tires"} value={e.tire_brand} onChange={(v) => upd(e.key, { tire_brand: v })} />
