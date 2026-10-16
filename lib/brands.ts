@@ -2,7 +2,7 @@
 // Las listas de abajo solo dicen qué marcas aparecen en cada selector.
 // Sin `image` se muestra un mosaico de texto.
 export type Brand = { name: string; image?: string };
-export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt" | "chassis_touring" | "chassis_gt";
+export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt" | "chassis_touring" | "chassis_gt" | "engine_eco_gt";
 
 const b = (name: string, file?: string, ext = "png"): Brand => ({ name, image: file ? `/brands/${file}.${ext}` : undefined });
 
@@ -17,6 +17,7 @@ const CATALOG = {
   nova: b("Nova Engines", "nova-engines"), gimar: b("Gi-Mar", "gimar"),
   fx: b("FX", "fx"),
   dragon: b("Dragon RC", "dragon-rc"), hotbodies: b("Hot Bodies", "hot-bodies"),
+  rcconcept: b("RC Concept", "rc-concept"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
   corsatec: b("Corsatec", "corsatec"), dash: b("Dash", "dash"), trinity: b("Trinity", "trinity"),
   tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
@@ -48,6 +49,8 @@ const LISTS: Record<BrandKind, Id[]> = {
     "fx",
   ],
   engine_eco: ecoBrands,
+  // RC Concept: solo motor, y solo en GT Eco
+  engine_eco_gt: [...ecoBrands, "rcconcept"],
   esc: [...ecoBrands, "dash"], // Dash: solo variador
   tires: ["sweep", "matrix"],
   // PMT solo para GT Nitro y GT Eco
@@ -64,6 +67,7 @@ export const KIND_LABEL: Record<BrandKind, string> = {
   chassis_gt: "Marca de chasis",
   engine_nitro: "Marca de motor nitro",
   engine_eco: "Marca de motor",
+  engine_eco_gt: "Marca de motor",
   esc: "Marca de variador (controladora)",
   tires: "Marca de gomas",
   tires_gt: "Marca de gomas",

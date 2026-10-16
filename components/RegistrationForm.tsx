@@ -117,7 +117,7 @@ export default function RegistrationForm() {
                 <input className={input} value={sel[c]!.transponder} onChange={(e) => upd(c, "transponder", e.target.value)} />
               </label>
               <BrandPicker kind={isTouring(c) ? "chassis_touring" : isGT(c) ? "chassis_gt" : "chassis"} value={sel[c]!.chassis_brand} onChange={(v) => upd(c, "chassis_brand", v)} />
-              <BrandPicker kind={isNitro(c) ? "engine_nitro" : "engine_eco"} value={sel[c]!.engine_brand} onChange={(v) => upd(c, "engine_brand", v)} />
+              <BrandPicker kind={isNitro(c) ? "engine_nitro" : isGT(c) ? "engine_eco_gt" : "engine_eco"} value={sel[c]!.engine_brand} onChange={(v) => upd(c, "engine_brand", v)} />
               {!isNitro(c) && <BrandPicker kind="esc" value={sel[c]!.esc_brand} onChange={(v) => upd(c, "esc_brand", v)} />}
               <BrandPicker kind={isGT(c) ? "tires_gt" : "tires"} value={sel[c]!.tire_brand} onChange={(v) => upd(c, "tire_brand", v)} />
             </div>
