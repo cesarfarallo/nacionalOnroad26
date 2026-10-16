@@ -16,14 +16,14 @@ const CATALOG = {
   osSpeed: b("O.S. Speed", "os-speed"), reds: b("REDS", "reds"), orion: b("Team Orion", "team-orion"),
   nova: b("Nova Engines", "nova-engines"), gimar: b("Gi-Mar", "gimar"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
-  dash: b("Dash", "dash"), trinity: b("Trinity", "trinity"),
+  corsatec: b("Corsatec", "corsatec"), dash: b("Dash", "dash"), trinity: b("Trinity", "trinity"),
   tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
   sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"), pmt: b("PMT", "pmt"),
 };
 type Id = keyof typeof CATALOG;
 
 const ecoBrands: Id[] = [
-  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote",
+  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote", "corsatec",
 ];
 
 const LISTS: Record<BrandKind, Id[]> = {
