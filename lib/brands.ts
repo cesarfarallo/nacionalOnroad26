@@ -15,6 +15,7 @@ const CATALOG = {
   novarossi: b("Novarossi", "novarossi"), picco: b("Picco", "picco"), sirio: b("Sirio", "sirio"),
   osSpeed: b("O.S. Speed", "os-speed"), reds: b("REDS", "reds"), orion: b("Team Orion", "team-orion"),
   nova: b("Nova Engines", "nova-engines"), gimar: b("Gi-Mar", "gimar"),
+  fx: b("FX", "fx"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
   corsatec: b("Corsatec", "corsatec"), dash: b("Dash", "dash"), trinity: b("Trinity", "trinity"),
   tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
@@ -38,6 +39,7 @@ const LISTS: Record<BrandKind, Id[]> = {
   ],
   engine_nitro: [
     "novarossi", "picco", "sirio", "osSpeed", "reds", "orion", "nova", "gimar",
+    "fx",
   ],
   engine_eco: ecoBrands,
   esc: [...ecoBrands, "dash"], // Dash: solo variador
