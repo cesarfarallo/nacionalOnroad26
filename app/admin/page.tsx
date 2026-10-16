@@ -4,6 +4,7 @@ import { CATEGORIES } from "@/lib/categories";
 import { csvWarnings, DATE_CLOCKS, DATE_ORDERS, parseDateMode, type DateClock, type DateMode, type DateOrder, type Row } from "@/lib/csv";
 import { Oswald } from "next/font/google";
 import { drawPoster } from "@/lib/poster";
+import AdminEditDialog from "@/components/AdminEditDialog";
 
 const oswald = Oswald({ subsets: ["latin"], weight: ["500", "700"] });
 
@@ -51,6 +52,7 @@ export default function Admin() {
     try { localStorage.setItem("csvDateMode", c === "none" ? "none" : `${o}-${c}`); } catch { /* ignorar */ }
   };
   const warn = useMemo(() => csvWarnings(rows ?? []), [rows]);
+  const [editing, setEditing] = useState<string | null>(null); // registration_id en edición
   const [busy, setBusy] = useState<string | null>(null);
   const [payMsg, setPayMsg] = useState("");
 
@@ -137,6 +139,14 @@ export default function Admin() {
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-4">
+      {editing && (
+        <AdminEditDialog
+          key={editing}
+          rows={rows.filter((r) => r.registration_id === editing)}
+          onClose={() => setEditing(null)}
+          onSaved={async (msg) => { setEditing(null); setPayMsg(msg); await load(); }}
+        />
+      )}
       <h1 className="text-2xl font-black">Inscriptos ({rows.length} inscripciones)</h1>
       <div className="flex flex-wrap gap-3">
         <a href={`/api/admin/export?date=${dateMode}`} className="rounded-lg bg-emerald-500 px-4 py-2 font-bold">Descargar CSV (GenericImport)</a>
@@ -179,6 +189,11 @@ export default function Admin() {
                   <td className="p-2">{p.cats.join(", ")}</td>
                   <td className="p-2">{p.optin ? "Sí" : "No"}</td>
                   <td className="p-2 text-right">
+                    <button type="button" onClick={() => setEditing(p.id)} disabled={busy === p.id}
+                      aria-label={`Editar la inscripción de ${p.name}`}
+                      className="mr-2 rounded-md border border-sky-400/60 px-2 py-1 text-xs font-bold text-sky-200 hover:bg-sky-500/20 disabled:opacity-40">
+                      Editar
+                    </button>
                     <button type="button" onClick={() => removePilot(p)} disabled={busy === p.id}
                       aria-label={`Eliminar la inscripción de ${p.name}`}
                       className="rounded-md border border-red-400/60 px-2 py-1 text-xs font-bold text-red-300 hover:bg-red-500/20 disabled:opacity-40">
