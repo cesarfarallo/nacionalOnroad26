@@ -2,7 +2,7 @@
 // Las listas de abajo solo dicen qué marcas aparecen en cada selector.
 // Sin `image` se muestra un mosaico de texto.
 export type Brand = { name: string; image?: string };
-export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt" | "chassis_touring";
+export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt" | "chassis_touring" | "chassis_gt";
 
 const b = (name: string, file?: string, ext = "png"): Brand => ({ name, image: file ? `/brands/${file}.${ext}` : undefined });
 
@@ -16,6 +16,7 @@ const CATALOG = {
   osSpeed: b("O.S. Speed", "os-speed"), reds: b("REDS", "reds"), orion: b("Team Orion", "team-orion"),
   nova: b("Nova Engines", "nova-engines"), gimar: b("Gi-Mar", "gimar"),
   fx: b("FX", "fx"),
+  dragon: b("Dragon RC", "dragon-rc"), hotbodies: b("Hot Bodies", "hot-bodies"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
   corsatec: b("Corsatec", "corsatec"), dash: b("Dash", "dash"), trinity: b("Trinity", "trinity"),
   tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
@@ -24,7 +25,7 @@ const CATALOG = {
 type Id = keyof typeof CATALOG;
 
 const ecoBrands: Id[] = [
-  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote", "corsatec",
+  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote", "corsatec", "dragon",
 ];
 
 const LISTS: Record<BrandKind, Id[]> = {
@@ -32,6 +33,11 @@ const LISTS: Record<BrandKind, Id[]> = {
   chassis: [
     "xray", "mugen", "serpent", "shepherd", "associated", "losi",
     "awesomatix", "kyosho", "tamiya", "yokomo", "schumacher",
+  ],
+  // Hot Bodies solo se ofrece en GT Nitro y GT Eco
+  chassis_gt: [
+    "xray", "mugen", "serpent", "shepherd", "associated", "losi",
+    "awesomatix", "kyosho", "tamiya", "yokomo", "schumacher", "hotbodies",
   ],
   chassis_touring: [
     "xray", "mugen", "serpent", "shepherd", "associated", "losi", "threeRacing",
@@ -55,6 +61,7 @@ export const BRANDS = Object.fromEntries(
 export const KIND_LABEL: Record<BrandKind, string> = {
   chassis: "Marca de chasis",
   chassis_touring: "Marca de chasis",
+  chassis_gt: "Marca de chasis",
   engine_nitro: "Marca de motor nitro",
   engine_eco: "Marca de motor",
   esc: "Marca de variador (controladora)",
