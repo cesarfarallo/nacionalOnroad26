@@ -2,7 +2,7 @@
 // Las listas de abajo solo dicen qué marcas aparecen en cada selector.
 // Sin `image` se muestra un mosaico de texto.
 export type Brand = { name: string; image?: string };
-export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt";
+export type BrandKind = "chassis" | "engine_nitro" | "engine_eco" | "esc" | "tires" | "tires_gt" | "chassis_touring";
 
 const b = (name: string, file?: string, ext = "png"): Brand => ({ name, image: file ? `/brands/${file}.${ext}` : undefined });
 
@@ -15,27 +15,34 @@ const CATALOG = {
   novarossi: b("Novarossi", "novarossi"), picco: b("Picco", "picco"), sirio: b("Sirio", "sirio"),
   osSpeed: b("O.S. Speed", "os-speed"), reds: b("REDS", "reds"), orion: b("Team Orion", "team-orion"),
   nova: b("Nova Engines", "nova-engines"), gimar: b("Gi-Mar", "gimar"),
+  fx: b("FX", "fx"),
   hobbywing: b("Hobbywing", "hobbywing"), orca: b("Orca", "orca"), reedy: b("Reedy", "reedy"), lrp: b("LRP", "lrp"),
-  trinity: b("Trinity", "trinity"),
+  corsatec: b("Corsatec", "corsatec"), dash: b("Dash", "dash"), trinity: b("Trinity", "trinity"),
   tekin: b("Tekin", "tekin"), novak: b("Novak", "novak"), cayote: b("Cayote", "cayote"),
   sweep: b("Sweep", "sweep", "webp"), matrix: b("Matrix", "matrix"), pmt: b("PMT", "pmt"),
 };
 type Id = keyof typeof CATALOG;
 
 const ecoBrands: Id[] = [
-  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote",
+  "hobbywing", "orca", "trinity", "reedy", "orion", "lrp", "tekin", "novak", "cayote", "corsatec",
 ];
 
 const LISTS: Record<BrandKind, Id[]> = {
+  // 3Racing solo se ofrece en Touring Eco (chassis_touring); el resto de las categorías no lo muestran
   chassis: [
+    "xray", "mugen", "serpent", "shepherd", "associated", "losi",
+    "awesomatix", "kyosho", "tamiya", "yokomo", "schumacher",
+  ],
+  chassis_touring: [
     "xray", "mugen", "serpent", "shepherd", "associated", "losi", "threeRacing",
     "awesomatix", "kyosho", "tamiya", "yokomo", "schumacher",
   ],
   engine_nitro: [
     "novarossi", "picco", "sirio", "osSpeed", "reds", "orion", "nova", "gimar",
+    "fx",
   ],
   engine_eco: ecoBrands,
-  esc: ecoBrands,
+  esc: [...ecoBrands, "dash"], // Dash: solo variador
   tires: ["sweep", "matrix"],
   // PMT solo para GT Nitro y GT Eco
   tires_gt: ["sweep", "matrix", "pmt"],
@@ -47,6 +54,7 @@ export const BRANDS = Object.fromEntries(
 
 export const KIND_LABEL: Record<BrandKind, string> = {
   chassis: "Marca de chasis",
+  chassis_touring: "Marca de chasis",
   engine_nitro: "Marca de motor nitro",
   engine_eco: "Marca de motor",
   esc: "Marca de variador (controladora)",

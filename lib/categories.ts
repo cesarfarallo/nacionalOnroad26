@@ -18,3 +18,4 @@ export const EXCLUSIVE_GROUPS: readonly (readonly Category[])[] = [
 /** Categorías del mismo grupo excluyente que `c` (sin incluirla). */
 export const exclusiveWith = (c: Category): Category[] =>
   EXCLUSIVE_GROUPS.filter((g) => g.includes(c)).flatMap((g) => g.filter((x) => x !== c));
+export const isTouring = (c: Category) => c === "Touring Eco Modified" || c === "Touring Eco Stock";

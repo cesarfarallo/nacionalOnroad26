@@ -4,7 +4,7 @@ export const CSV_HEADER =
 export type Row = {
   first_name: string; last_name: string; nickname: string | null; email: string;
   phone: string | null; club: string | null; created_at: string;
-  registration_id: string; email_optin: boolean; paid: boolean;
+  registration_id: string; entry_id: string; email_optin: boolean; paid: boolean;
   category: string; transponder: string | null;
   chassis_brand: string | null; engine_brand: string | null; esc_brand: string | null; tire_brand: string | null;
 };
